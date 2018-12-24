@@ -24,7 +24,7 @@ namespace Booktopia
                 role.Name = "Administrator";
                 roleManager.Create(role);
                 var user = new ApplicationUser();
-                user.UserName = "radusorin";
+                user.UserName = "radusorin@admin.com";
                 user.Email = "radusorin@admin.com";
                 var adminCreated = UserManager.Create(user, "radminsorin");
                 if (adminCreated.Succeeded)
