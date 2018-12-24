@@ -5,6 +5,11 @@
       "taskName": "task-Booktopi",
       "appliesTo": "/",
       "type": "launch"
+    },
+    {
+      "taskName": "task-Booktopia",
+      "appliesTo": "Booktopia.sln",
+      "type": "launch"
     }
   ]
 }
