@@ -26,6 +26,7 @@ namespace Booktopia
                 var user = new ApplicationUser();
                 user.UserName = "radusorin@admin.com";
                 user.Email = "radusorin@admin.com";
+                //user.userProfile = null;
                 var adminCreated = UserManager.Create(user, "radminsorin");
                 if (adminCreated.Succeeded)
                 {

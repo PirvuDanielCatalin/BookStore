@@ -114,5 +114,6 @@ namespace Booktopia
             var roleStore = new RoleStore<IdentityRole>(context.Get<ApplicationDbContext>());
             return new ApplicationRoleManager(roleStore);
         }
-    }
+    }
+
 }

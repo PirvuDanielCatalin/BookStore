@@ -31,6 +31,9 @@ namespace Booktopia.Models
         }
 
         public DbSet<Profile> Profiles { get; set; }
+        public DbSet<Book> Books { get; set; }
+        public DbSet<BookComment> BookComments { get; set; }
+        public DbSet<Rating> Ratings { get; set; }
         public static ApplicationDbContext Create()
         {
             return new ApplicationDbContext();
