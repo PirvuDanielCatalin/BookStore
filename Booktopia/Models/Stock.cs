@@ -6,21 +6,15 @@ using System.Web;
 
 namespace Booktopia.Models
 {
-    public class BookComment
+    public class Stock
     {
         [Key]
-        public int CommentId { get; set; }
+        public int StockId { get; set; }
         [Required]
-        public string Comentariu { get; set; }
-        [Required]
-        public DateTime DataAprobare { get; set; }
-        public string UserId { get; set; }
-        [Required]
-        public virtual ApplicationUser User { get; set; }
+        public int Cantitate { get; set; }
         [Required]
         public int BookId { get; set; }
         [Required]
         public virtual Book book { get; set; }
-
     }
 }
