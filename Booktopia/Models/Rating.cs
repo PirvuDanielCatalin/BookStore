@@ -12,7 +12,7 @@ namespace Booktopia.Models
         [Key]
         public int RatingId { get; set; }
         [Required]
-        public int RatingValue { get; set; }
+        public float RatingValue { get; set; }
         [Required]
         public string UserId { get; set; }
         [Required]

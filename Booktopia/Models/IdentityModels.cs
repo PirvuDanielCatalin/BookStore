@@ -20,7 +20,7 @@ namespace Booktopia.Models
             // Add custom user claims here
             return userIdentity;
         }
-        
+        public IEnumerable<SelectListItem> AllRoles { get; set; }
         public int ProfileId { get; set; }
         public virtual Profile userProfile { get; set; }
         public int IdCerere { get; set; }

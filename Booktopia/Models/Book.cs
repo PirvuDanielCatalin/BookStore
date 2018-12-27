@@ -22,6 +22,8 @@ namespace Booktopia.Models
         public string Fotografie { get; set; }
         [Required]
         public int Pret { get; set; }
+        [Required]
+        public int Status { get; set; }
         public int Id { get; set; }
         [Required]
         public virtual BookCategory bookCategory { get; set; }
@@ -33,7 +35,7 @@ namespace Booktopia.Models
         public int StockId { get; set; }
         public virtual Stock stock { get; set; }
         [Required]
-        public int RaitingId { get; set; }
+        public int RatingId { get; set; }
         [Required]
         public virtual Rating rating { get; set; }
         public IEnumerable<SelectListItem> Ratings { get; set; }

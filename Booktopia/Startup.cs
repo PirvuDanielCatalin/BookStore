@@ -26,11 +26,18 @@ namespace Booktopia
                 var user = new ApplicationUser();
                 user.UserName = "radusorin@admin.com";
                 user.Email = "radusorin@admin.com";
-                //user.userProfile = null;
                 var adminCreated = UserManager.Create(user, "radminsorin");
                 if (adminCreated.Succeeded)
                 {
                     UserManager.AddToRole(user.Id, "Administrator");
+                }
+                var user2 = new ApplicationUser();
+                user2.UserName = "pirvudaniel@admin.com";
+                user2.Email = "pirvudaniel@admin.com";
+                var admin2Created = UserManager.Create(user2, "padmindaniel");
+                if (admin2Created.Succeeded)
+                {
+                    UserManager.AddToRole(user2.Id, "Administrator");
                 }
             }
             if (!roleManager.RoleExists("Colaborator"))
