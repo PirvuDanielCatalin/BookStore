@@ -50,7 +50,8 @@ namespace Booktopia.Controllers
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
         }
         public ActionResult Show(int id)
@@ -104,7 +105,8 @@ namespace Booktopia.Controllers
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
         }
         [HttpDelete]

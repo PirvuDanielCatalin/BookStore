@@ -18,8 +18,8 @@ namespace Booktopia
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
-            //Database.SetInitializer(new DropCreateDatabaseAlways<ApplicationDbContext>());
-
+            // Decomenteaza linia pt a crea baza de date la fiecare rulare
+            // Database.SetInitializer(new DropCreateDatabaseAlways<ApplicationDbContext>());
         }
     }
 }

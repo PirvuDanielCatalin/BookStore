@@ -12,100 +12,57 @@ namespace Booktopia.Controllers
     public class RatingController : Controller
     {
         private ApplicationDbContext db = ApplicationDbContext.Create();
-        // GET: Rating
-        public ActionResult New()
-        {
-            return View();
-        }
+
         [HttpPost]
-        public ActionResult New(Rating rating)
+        public ActionResult NewOrEdit(Rating requestRating)
         {
             try
             {
-
-                if (ModelState.IsValid)
+                var UserId = User.Identity.GetUserId(); // Id user logat
+                // Testam daca userul a mai evaluat cartea
+                var result = db.Ratings.Where(r => r.BookId == requestRating.BookId && r.UserId == UserId).ToList();
+                if (result.Count == 0)
                 {
-                    if (User.Identity.GetUserId() != rating.book.PartenerRequirement.UserId)
+                    Rating rating = requestRating;
+                    rating.Book = db.Books.Find(rating.BookId);
+                    rating.UserId = UserId;
+                    rating.User = db.Users.Find(UserId);
+
+                    if (ModelState.IsValid)
                     {
                         db.Ratings.Add(rating);
                         db.SaveChanges();
-                        TempData["message"] = "Cartea a fost evaluata !";
+                        TempData["message"] = "Cartea a fost evaluată !";
+                        return Content("Succes");
                     }
                     else
                     {
-                        TempData["message"] = "Nu puteti evalua propria carte !";
+                        return Content("Error");
                     }
-                    return RedirectToAction("Index");
                 }
                 else
                 {
-                    ModelState.Clear();
-                    return View();
-                }
-            }
-            catch (Exception e)
-            {
-                return View();
-            }
-        }
-        public ActionResult Edit(int id)
-        {
-            Rating rating = db.Ratings.Find(id);
-            if (User.Identity.GetUserId() != rating.book.PartenerRequirement.UserId)
-                return View(rating);
-            else
-            {
-                TempData["message"] = "Nu puteti evalua propria carte !";
-                return RedirectToRoute("/home/index");
-            }
-        }
-        [HttpPut]
-        public ActionResult Edit(int id, Rating requestRating)
-        {
-            try
-            {
-                Rating rating = db.Ratings.Find(id);
-                if (ModelState.IsValid)
-                {
-                    if (User.Identity.GetUserId() != rating.book.PartenerRequirement.UserId)
+                    Rating rating = result.First();
+                    if (ModelState.IsValid)
                     {
                         if (TryUpdateModel(rating))
                         {
-                            rating.RatingValue = requestRating.RatingValue;
+                            rating.Value = requestRating.Value;
                             db.SaveChanges();
                         }
-                        return RedirectToAction("Index");
+                        return Content("Succes");
                     }
                     else
                     {
-                        TempData["message"] = "Nu puteti evalua propria carte !";
-                        return RedirectToRoute("/home/index");
+                        return Content("Error");
                     }
-                }
-                else
-                {
-                    ModelState.Clear();
-                    return View();
                 }
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
-        }
-        [HttpDelete]
-        public ActionResult Delete(int id)
-        {
-            Rating rating = db.Ratings.Find(id);
-            if (User.Identity.GetUserId() != rating.book.PartenerRequirement.UserId)
-            {
-                TempData["message"] = "Evaluarea a fost sters !";
-                db.Ratings.Remove(rating);
-                db.SaveChanges();
-            }
-            else
-                TempData["message"] = "Nu puteti evalua propria carte !";
-            return RedirectToRoute("/home/index");
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
@@ -9,19 +10,25 @@ namespace Booktopia.Models
 {
     public class PartnerRequirement
     {
-        [Key,Column(Order = 1)]
+        [Key]
         public int IdCerere { get; set; }
-        [Key, Column(Order = 2)]
+        
         public int Cantitate { get; set; }
-        [Required]
-        public int Status { get; set; }
-        [Required]
+        
+        public int Status { get; set; } // 0 - In asteptarea unui raspuns, 1 - Acceptata, -1 - Respinsa
+
         public int BookId { get; set; }
-        [Required]
-        public virtual Book book { get; set; }
-        [Required]
         public string UserId { get; set; }
-        [Required]
+        
+        // Relatii
+        public virtual Book Book { get; set; }
         public virtual ApplicationUser User { get; set; }
+
+        // Defaults
+        public PartnerRequirement()
+        {
+            this.Cantitate = 0;
+            this.Status = 0;
+        }
     }
 }

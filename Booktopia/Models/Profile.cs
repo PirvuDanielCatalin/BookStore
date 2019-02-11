@@ -11,15 +11,21 @@ namespace Booktopia.Models
     {
         [Key]
         public int ProfileId { get; set; }
+
         [Required]
         public string Nume { get; set; }
+
         [Required]
         public string Prenume { get; set; }
+
         [Required]
         public string Adresa { get; set; }
+
         public string Fotografie { get; set; }
-        [Required]
+        
         public string UserId { get; set; }
+
+        // Relatii
         [Required]
         public virtual ApplicationUser User { get; set; }
     }

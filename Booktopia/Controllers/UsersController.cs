@@ -1,6 +1,7 @@
 ﻿using Booktopia.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,23 +14,18 @@ namespace Booktopia.Controllers
     public class UsersController : Controller
     {
         private ApplicationDbContext db = ApplicationDbContext.Create();
-        // GET: User
+
         public ActionResult Index()
         {
-            var users = from user in db.Users
-                        orderby user.UserName
-                        select user;
-            ViewBag.UsersList = users;
+            ViewBag.Users = db.Users.OrderBy(u => u.UserName);
+            ViewBag.Roles = GetAllRoles();
+            foreach (var elem in db.Users.OrderBy(u => u.UserName).ToList())
+            {
+                var y = elem.Roles.FirstOrDefault().RoleId;
+            }
             return View();
         }
-        public ActionResult Edit(string id)
-        {
-            ApplicationUser user = db.Users.Find(id);
-            user.AllRoles = GetAllRoles();
-            var userRole = user.Roles.FirstOrDefault();
-            ViewBag.userRole = userRole.RoleId;
-            return View(user);
-        }
+        
         [NonAction]
         public IEnumerable<SelectListItem> GetAllRoles()
         {
@@ -45,14 +41,25 @@ namespace Booktopia.Controllers
             }
             return selectList;
         }
-        [HttpPut]
-        public ActionResult Edit(string id, ApplicationUser newData)
-        {
 
-            ApplicationUser user = db.Users.Find(id);
-            user.AllRoles = GetAllRoles();
+        [HttpPost]
+        public ActionResult UpdateUsersRoles(string data)
+        {
+            var values = JsonConvert.DeserializeObject<Dictionary<string, string>>(data);
+            var succes = true;
+            foreach(KeyValuePair<string, string> keyvalue in values)
+            {
+                succes = succes && this.Edit(keyvalue.Key, keyvalue.Value);
+            }
+            return (succes) ? Content("Succes") : Content("Error");
+        }
+
+        [NonAction]
+        public bool Edit(string userId, string roleId)
+        {
+            ApplicationUser user = db.Users.Find(userId);
             var userRole = user.Roles.FirstOrDefault();
-            ViewBag.userRole = userRole.RoleId;
+            var Role = db.Roles.Find(roleId);
             try
             {
                 ApplicationDbContext context = new ApplicationDbContext();
@@ -60,27 +67,20 @@ namespace Booktopia.Controllers
                 var UserManager = new UserManager<ApplicationUser>(new UserStore<ApplicationUser>(context));
                 if (TryUpdateModel(user))
                 {
-                    user.UserName = newData.UserName;
-                    user.Email = newData.Email;
-                    user.PhoneNumber = newData.PhoneNumber;
                     var roles = from role in db.Roles select role;
                     foreach (var role in roles)
                     {
-                        UserManager.RemoveFromRole(id, role.Name);
+                        UserManager.RemoveFromRole(userId, role.Name);
                     }
-                    var selectedRole =
-                    db.Roles.Find(HttpContext.Request.Params.Get("newRole"));
-                    UserManager.AddToRole(id, selectedRole.Name);
+                    UserManager.AddToRole(userId, Role.Name);
                     db.SaveChanges();
                 }
-                return RedirectToAction("Index");
+                return true;
             }
             catch (Exception e)
             {
-                Response.Write(e.Message);
-                return View(user);
+                return false;
             }
-
         }
     }
 }

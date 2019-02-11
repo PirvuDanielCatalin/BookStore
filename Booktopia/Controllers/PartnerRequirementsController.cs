@@ -12,119 +12,68 @@ namespace Booktopia.Controllers
     public class PartnerRequirementsController : Controller
     {
         private ApplicationDbContext db = ApplicationDbContext.Create();
-        // GET: PartnerRequirements
+
         public ActionResult Index()
         {
+            var requirements = db.PartnerRequirements.Include("Book").Include("User").Where(requirement => requirement.Status == 0);
+            if (User.IsInRole("Colaborator"))
+                requirements.Where(requirement => requirement.UserId == User.Identity.GetUserId());
+
+            ViewBag.Requirements = requirements;
+            ViewBag.RequirementsJson = GetAllRequirements();
+            
+            ViewBag.Rol = (User.IsInRole("Administrator")) ? "Administrator" : "Colaborator";
             return View();
         }
+
         [NonAction]
-        public JsonResult getAllRequirements()
+        public JsonResult GetAllRequirements()
         {
             var requirements = db.PartnerRequirements.Include("Book").Include("User");
             if (User.IsInRole("Colaborator"))
                 requirements.Where(requirement => requirement.UserId == User.Identity.GetUserId());
             return Json(requirements.ToList(), JsonRequestBehavior.AllowGet);
         }
-        public ActionResult Show(int id)
-        {
-            PartnerRequirement requirement = db.PartnerRequirements.Find(id);
-            ViewBag.afisareButoane = false;
-            if (User.IsInRole("Administrator"))
-            {
-                ViewBag.afisareButoane = true;
-            }
-            ViewBag.esteAdmin = User.IsInRole("Administrator");
-            return View(requirement);
 
-        }
-
-        public ActionResult New()
-        {
-            return View();
-        }
-        [HttpPost]
-        public ActionResult New(PartnerRequirement requirement)
-        {
-            try
-            {
-                    if (ModelState.IsValid)
-                    {
-                        db.PartnerRequirements.Add(requirement);
-                        db.SaveChanges();
-                        TempData["message"] = "Cererea a fost inregistrata cu succes.Dupa aprobarea cererii de catre administrator, produsul va fi disponibil in magazin !";
-                        return RedirectToAction("Index");
-                    }
-                    else
-                    {
-                        ModelState.Clear();
-                        return View();
-                    }
-            }
-            catch (Exception e)
-            {
-                return View();
-            }
-        }
-        public ActionResult Edit(int id)
-        {
-            PartnerRequirement requirement = db.PartnerRequirements.Find(id);
-            return View(requirement);
-        }
-        [HttpPut]
-        public ActionResult Edit(int id, PartnerRequirement requestRequirement)
-        {
-            try
-            {
-                PartnerRequirement requirement = db.PartnerRequirements.Find(id);
-                if (ModelState.IsValid)
-                {
-                    if ((User.Identity.GetUserId() == requirement.UserId) || (User.IsInRole("Administrator")))
-                    {
-                        if (TryUpdateModel(requirement))
-                        {
-                            requirement.Cantitate = requestRequirement.Cantitate;
-                            if (User.IsInRole("Administrator"))
-                            {
-                                requirement.Status = requestRequirement.Status;
-                            }
-                            db.SaveChanges();
-                        }
-                        return RedirectToAction("Index");
-                    }
-                    else
-                    {
-                        TempData["message"] = "Nu puteti edita cererea !";
-                        return View();
-                    }
-                }
-                else
-                {
-                    ModelState.Clear();
-                    return View();
-                }
-            }
-            catch (Exception e)
-            {
-                return View();
-            }
-        }
         [HttpDelete]
         public ActionResult Delete(int id)
         {
             PartnerRequirement requirement = db.PartnerRequirements.Find(id);
-            if ((requirement.Status == 0) && (User.Identity.GetUserId() == requirement.UserId) || User.IsInRole("Administrator"))
+            if (requirement.Status == 0 && (User.IsInRole("Administrator") || (User.Identity.GetUserId() == requirement.UserId)))
             {
-                TempData["message"] = "Cererea a fost stersa !";
+                TempData["message"] = "Cererea a fost ștearsă !";
                 db.PartnerRequirements.Remove(requirement);
                 db.Books.Remove(db.Books.Find(requirement.BookId));
                 db.SaveChanges();
-                return RedirectToAction("Index");
+                return Content("Succes");
             }
             else
             {
-                TempData["message"] = "Cererea nu poate fi stearsa !";
-                return RedirectToAction("Index");
+                TempData["message"] = "Cererea nu poate fi ștearsă !";
+                return Content("NoRight");
             }
+        }
+
+        [HttpPost]
+        public ActionResult ChangeRequirementStatus(int id, string newStatus)
+        {
+            PartnerRequirement partnerRequirement = db.PartnerRequirements.Find(id);
+            if (newStatus == "Accept")
+            {
+                partnerRequirement.Status = 1;
+                Book book = db.Books.Find(partnerRequirement.BookId);
+                book.Status = 1;
+                db.SaveChanges();
+                return Content("Succes");
+            }
+            else if (newStatus == "Reject")
+            {
+                partnerRequirement.Status = -1;
+                db.Books.Remove(db.Books.Find(partnerRequirement.BookId));
+                db.SaveChanges();
+                return Content("Succes");
+            }
+            return Content("Error");
         }
     }
 }

@@ -11,61 +11,38 @@ namespace Booktopia.Controllers
     public class BookCommentsController : Controller
     {
         private ApplicationDbContext db = ApplicationDbContext.Create();
-        // GET: BookComments
-        [Authorize(Roles = "User,Colaborator,Administrator")]
-        public ActionResult New()
-        {
-            return View();
-        }
+
         [HttpPost]
         [Authorize(Roles = "User,Colaborator,Administrator")]
         public ActionResult New(BookComment bookComment)
         {
+            bookComment.Likes = 0;
+            bookComment.DataAprobare = DateTime.Now;
+            bookComment.Book = db.Books.Find(bookComment.BookId);
+            bookComment.UserId = User.Identity.GetUserId();
+            bookComment.User = db.Users.Find(bookComment.UserId);
+
             try
             {
-
                 if (ModelState.IsValid)
                 {
-                    if (User.Identity.GetUserId() != bookComment.book.PartenerRequirement.UserId)
-                    {
-                        db.BookComments.Add(bookComment);
-                        db.SaveChanges();
-                        TempData["message"] = "Comentariul a fost adaugat!";
-                    }
-                    else
-                    {
-                        TempData["message"] = "Nu puteti lasa comentarii la propria carte !";
-                    }
-                    return RedirectToAction("Index");
+                    db.BookComments.Add(bookComment);
+                    db.SaveChanges();
+                    TempData["message"] = "Comentariul a fost adăugat!";
+                    return Content("Succes");
                 }
                 else
                 {
-                    ModelState.Clear();
-                    return View();
+                    return Content("Error");
                 }
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
         }
-        public ActionResult Show(int id)
-        {
-            BookComment bookComment = db.BookComments.Find(id);
-            return View(bookComment);
-        }
-        [Authorize(Roles = "User,Colaborator,Administrator")]
-        public ActionResult Edit(int id)
-        {
-            BookComment bookComment = db.BookComments.Find(id);
-            if (User.Identity.GetUserId() != bookComment.book.PartenerRequirement.UserId)
-                return View(bookComment);
-            else
-            {
-                TempData["message"] = "Nu puteti lasa comentarii la propria carte !";
-                return RedirectToRoute("/home/index");
-            }
-        }
+
         [HttpPut]
         public ActionResult Edit(int id, BookComment requestBookComment)
         {
@@ -74,47 +51,50 @@ namespace Booktopia.Controllers
                 BookComment bookComment = db.BookComments.Find(id);
                 if (ModelState.IsValid)
                 {
-                    if (User.Identity.GetUserId() != bookComment.book.PartenerRequirement.UserId)
+                    var UserId = User.Identity.GetUserId();
+                    if (User.IsInRole("Administrator") || UserId == bookComment.UserId)
                     {
                         if (TryUpdateModel(bookComment))
                         {
                             bookComment.Comentariu = requestBookComment.Comentariu;
-                            bookComment.DataAprobare = requestBookComment.DataAprobare;
+                            bookComment.DataAprobare = DateTime.Now;
                             db.SaveChanges();
                         }
-                        return RedirectToAction("Index");
+                        return Content("Succes");
                     }
                     else
                     {
-                        TempData["message"] = "Nu puteti lasa comentarii la propria carte !";
-                        return RedirectToRoute("/home/index");
+                        return Content("NoRight");
                     }
                 }
                 else
                 {
-                    ModelState.Clear();
-                    return View();
+                    return Content("Error");
                 }
             }
             catch (Exception e)
             {
-                return View();
+                return Content("Exception:" + e.Message);
             }
         }
+
         [HttpDelete]
         [Authorize(Roles = "User,Colaborator,Administrator")]
         public ActionResult Delete(int id)
         {
             BookComment bookComment = db.BookComments.Find(id);
-            if (User.Identity.GetUserId() != bookComment.book.PartenerRequirement.UserId)
+            if (User.IsInRole("Administrator") || User.Identity.GetUserId() == bookComment.UserId)
             {
-                TempData["message"] = "Comentariul a fost sters !";
+                TempData["message"] = "Comentariul a fost șters !";
                 db.BookComments.Remove(bookComment);
                 db.SaveChanges();
+                return Content("Succes");
             }
             else
-                TempData["message"] = "Nu puteti lasa comentarii la propria carte !";
-            return RedirectToRoute("/home/index");
+            {
+                return Content("NoRight");
+            }
+
         }
     }
 }

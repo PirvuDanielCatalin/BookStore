@@ -12,32 +12,34 @@ namespace Booktopia.Controllers
     public class BuysController : Controller
     {
         private ApplicationDbContext db = ApplicationDbContext.Create();
-        // GET: Buy
+
         [Authorize(Roles = "Colaborator,Administrator")]
         public ActionResult Index()
         {
             return View();
         }
+
         [NonAction]
         public JsonResult getAllBuys()
         {
-            var buys = db.Buys.Include("Book").Include("Invoice").Include("User");
-            if (User.IsInRole("Colaborator"))
-               buys.Where(buy => buy.book.PartenerRequirement.UserId == User.Identity.GetUserId());
+            var buys = db.Buys.Include("Book")
+                              .Include("Invoice")
+                              .Include("User");
+            //if (User.IsInRole("Colaborator"))
+            //   buys.Where(buy => buy.Book.PartnerRequirement.UserId == User.Identity.GetUserId());
             return Json(buys.ToList(), JsonRequestBehavior.AllowGet);
         }
-        // GET: BookComments
 
         public ActionResult New()
         {
             return View();
         }
+
         [HttpPost]
         public ActionResult New(Buy buy)
         {
             try
             {
-
                 if (ModelState.IsValid)
                 {
                     db.Buys.Add(buy);
@@ -53,9 +55,11 @@ namespace Booktopia.Controllers
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
         }
+
         public ActionResult Show(int id)
         {
             Buy buy = db.Buys.Find(id);
@@ -68,6 +72,7 @@ namespace Booktopia.Controllers
             }
         }
       
+        /*
         [HttpDelete]
         public ActionResult Delete(int id)
         {
@@ -82,5 +87,6 @@ namespace Booktopia.Controllers
                 TempData["message"] = "Nu puteti sterge comenzilor altora !";
             return RedirectToRoute("/home/index");
         }
+        */
     }
 }

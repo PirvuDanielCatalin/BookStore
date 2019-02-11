@@ -12,12 +12,15 @@ namespace Booktopia.Controllers
     public class CategoriesController : Controller
     {
         private ApplicationDbContext db = ApplicationDbContext.Create();
+
         // GET: Categories
-        [Authorize(Roles = "User,Colaborator,Administrator")]
+        [Authorize(Roles = "Administrator")]
         public ActionResult Index()
         {
+            ViewBag.categories = db.Categories;
             return View();
         }
+
         [NonAction]
         [Authorize(Roles = "User,Colaborator,Administrator")]
         public JsonResult getAllCategories()
@@ -25,7 +28,8 @@ namespace Booktopia.Controllers
             var categories = db.Categories.Include("BookCategory");
             return Json(categories.ToList(), JsonRequestBehavior.AllowGet);
         }
-        [Authorize(Roles = "User,Colaborator,Administrator")]
+
+        [Authorize(Roles = "Administrator")]
         public ActionResult Show(int id)
         {
             Category category = db.Categories.Find(id);
@@ -44,6 +48,7 @@ namespace Booktopia.Controllers
         { 
             return View();
         }
+
         [HttpPost]
         [Authorize(Roles = "Administrator")]
         public ActionResult New(Category category)
@@ -56,27 +61,32 @@ namespace Booktopia.Controllers
                     {
                         db.Categories.Add(category);
                         db.SaveChanges();
-                        TempData["message"] = "Categoria a fost adaugata !";
+                        TempData["status"] = true;
+                        TempData["message"] = "Categoria a fost adăugată!";
                         return RedirectToAction("Index");
                     }
                     else
                     {
-                        ModelState.Clear();
-                        return View();
+                        TempData["status"] = false;
+                        TempData["message"] = "Eroare la adăugarea categoriei!";
+                        return RedirectToAction("Index");
                     }
                 }
                 else
                 {
-                    TempData["message"] = "Doar administratorul pot face asta !";
+                    TempData["status"] = false;
+                    TempData["message"] = "Doar administratorul pot adăuga categorii!";
                     return RedirectToAction("Index");
 
                 }
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
         }
+
         [Authorize(Roles = "Administrator")]
         public ActionResult Edit(int id)
         {
@@ -91,6 +101,7 @@ namespace Booktopia.Controllers
                 return RedirectToAction("Index");
             }
         }
+
         [HttpPut]
         [Authorize(Roles = "Administrator")]
         public ActionResult Edit(int id, Category requestCategory)
@@ -123,9 +134,11 @@ namespace Booktopia.Controllers
             }
             catch (Exception e)
             {
-                return View();
+                TempData["message"] = "Excepție: " + e.Message;
+                return View("~/Views/Shared/NoRight.cshtml");
             }
         }
+
         [HttpDelete]
         [Authorize(Roles = "Administrator")]
         public ActionResult Delete(int id)

@@ -2,9 +2,10 @@
   "ExpandedNodes": [
     "",
     "\\Booktopia",
-    "\\Booktopia\\App_Start",
-    "\\Booktopia\\Controllers",
-    "\\Booktopia\\Models"
+    "\\Booktopia\\Content",
+    "\\Booktopia\\Models",
+    "\\Booktopia\\Scripts"
   ],
+  "SelectedNode": "\\Booktopia.sln",
   "PreviewInSolutionExplorer": false
 }

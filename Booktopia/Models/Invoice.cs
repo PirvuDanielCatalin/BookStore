@@ -11,16 +11,17 @@ namespace Booktopia.Models
     {
         [Key]
         public int InvoiceId { get; set; }
+
         [Required]
-        public DateTime data { get; set; }
+        public DateTime Data { get; set; }
+
         [Required]
         public string AdresaFacturare { get; set; }
+
         [Required]
         public string AdresaLivrare { get; set; }
-        [Required]
-        public int BuyId { get; set; }
-        [Required]
-        public virtual Buy buy { get; set; }
-        public IEnumerable<SelectListItem> Buys { get; set; }
+
+        // Relatii
+        public virtual ICollection<Buy> Buys { get; set; }
     }
 }

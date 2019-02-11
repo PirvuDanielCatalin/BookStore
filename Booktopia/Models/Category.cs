@@ -11,10 +11,11 @@ namespace Booktopia.Models
     {
         [Key]
         public int CategoryId { get; set; }
+
         [Required]
         public string Nume { get; set; }
-        public int Id { get; set; }
-        public virtual BookCategory bookCategory { get; set; }
-        public IEnumerable<SelectListItem> BookCategories { get; set; }
+
+        // Relatii
+        public virtual ICollection<BookCategory> BookCategories { get; set; }
     }
 }
