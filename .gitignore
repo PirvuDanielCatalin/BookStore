@@ -5,3 +5,5 @@
 /.vs/Booktopia/v15/Server/sqlite3/db.lock
 /Booktopia/App_Data/aspnet-Booktopia-20181224125340.mdf
 /Booktopia/App_Data/aspnet-Booktopia-20181224125340_log.ldf
+.vscode
+packages

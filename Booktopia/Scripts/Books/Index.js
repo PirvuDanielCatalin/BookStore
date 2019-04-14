@@ -1,4 +1,0 @@
-﻿// Book Index
-$(function () {
-
-});
